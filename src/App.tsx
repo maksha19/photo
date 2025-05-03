@@ -5,7 +5,7 @@ import Landing from "./pages/Landing";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/photo" element={<Home />} />
       <Route path="/landing" element={<Landing />} />
     </Routes>
   );
