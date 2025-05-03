@@ -5,7 +5,7 @@ type ImageType = { id: string; imagePath: string };
 
 export default function ImageGrid() {
     const [images, setImages] = useState<ImageType[][]>([]);
-    const [lastEvaluatedKey, setLastEvaluatedKey] = useState<string | null>(null);
+    const [lastEvaluatedKey, setLastEvaluatedKey] = useState<string | null>('first');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -21,7 +21,9 @@ export default function ImageGrid() {
     useEffect(() => {
         if (images[currentPage]) return; // Already cached
         if(mobile === "") return;
-        axios.post(`https://2jlple5l42kiuf4fhoup77n4om0hqesm.lambda-url.ap-southeast-1.on.aws/`, { lastEvaluatedKey, "action": "getImages", "mobile": mobile, })
+        if(lastEvaluatedKey === null) return;
+        const lastKey = lastEvaluatedKey === 'first' ? null : lastEvaluatedKey
+        axios.post(`https://2jlple5l42kiuf4fhoup77n4om0hqesm.lambda-url.ap-southeast-1.on.aws/`, { lastEvaluatedKey :lastKey, "action": "getImages", "mobile": mobile, })
             .then(res => {
                 const newImages = [...images];
                 newImages[currentPage] = res.data.items
@@ -59,6 +61,9 @@ export default function ImageGrid() {
     }
     return (
         <div className="p-4">
+            <div className="flex justify-center items-center mb-3 h-16 text-lg font-semibold text-gray-700 bg-[#801f36] text-[#FFF] rounded shadow-md">
+            Toastmasters District 80, AC 2025
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {images[currentPage]?.map(img => (
                     <React.Fragment key={img.id}>
