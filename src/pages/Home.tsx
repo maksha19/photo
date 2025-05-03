@@ -8,20 +8,33 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     // Save to session or state management if needed
     try {
       const response = await axios.post("https://2jlple5l42kiuf4fhoup77n4om0hqesm.lambda-url.ap-southeast-1.on.aws/", {
-      name: name,
-      mobile: mobile,
+        name: name,
+        mobile: mobile,
+        action: "login"
       });
-      if (response.status === 201) {
-        sessionStorage.setItem("quota", "5");
-        navigate("/landing", { state: { quota: 5 } });
-      } else if (response.status === 200) {
+      const {statusCode} = response.data
+      console.log("Response:", response);
+      if (statusCode === 201) {
+        const profile={
+          name: name,
+          mobile: mobile,
+          quota: 5
+        }
+        localStorage.setItem("profile", JSON.stringify(profile));
+        navigate("/landing");
+      } else if (statusCode === 200) {
         const quota = response.data.user.quota;
-        sessionStorage.setItem("quota", quota.toString());
-        navigate("/landing", { state: { quota } });
+        const profile={
+          name: name,
+          mobile: mobile,
+          quota
+        }
+        localStorage.setItem("profile", JSON.stringify(profile));
+        navigate("/landing");
       }
       console.log("Data submitted successfully:", response.data);
     } catch (error) {

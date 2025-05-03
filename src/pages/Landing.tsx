@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UploadCloud } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 const Landing = () => {
 
+  const [quota, setQuota] = useState(0);
+  const [mobile, setMobile] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [showModal, setShowModal] = useState(false);
 
-  const location = useLocation();
-  const { quota } = location.state || {}; // fallback if undefined
+  useEffect(() => {
+    const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+    console.log("Quota from state:", profile);
+    if (profile) {
+      setQuota(parseInt(profile.quota) || 0);
+      setMobile(profile.mobile || "");
+    }
+  }, []);
+  
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -18,11 +28,10 @@ const Landing = () => {
       alert(`You can only upload ${quota} images total.`);
       return;
     }
-
     setImages(prev => [...prev, ...selectedFiles]);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (images.length === 0) {
       alert("Please upload at least one image.");
       return;
@@ -35,10 +44,82 @@ const Landing = () => {
       alert(`The total size of all images exceeds the maximum limit of 5MB.`);
       return;
     }
+    // Here you would typically handle the submission of the images
+    // For example, you could send them to a server or process them
+    // For demonstration, we'll just log the image names
+    // and show a success message
 
-    console.log("Submitting images:", images.map(img => img.name));
-    // Clear after submit if needed
-    // setImages([]);
+    const files = await Promise.all(
+      images.map(image =>
+        new Promise<{ fileName: string; fileContentBase64: string }>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            const img = new Image();
+            img.src = reader.result as string;
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
+              const maxWidth = 1200; // Set max width for the image
+              const maxHeight = 1200; // Set max height for the image
+              let { width, height } = img;
+
+              if (width > maxWidth || height > maxHeight) {
+                if (width > height) {
+                  height = (height * maxWidth) / width;
+                  width = maxWidth;
+                } else {
+                  width = (width * maxHeight) / height;
+                  height = maxHeight;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              ctx?.drawImage(img, 0, 0, width, height);
+
+              const optimizedBase64 = canvas.toDataURL("image/jpeg", 0.9); // Compress to 100% quality
+              resolve({
+                fileName: image.name,
+                fileContentBase64: optimizedBase64.split(",")[1] || "",
+              });
+            };
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(image);
+        })
+      )
+    );
+
+
+
+    console.log("Files to upload:", files);
+    if (mobile === "") {
+      alert("Please login to upload images.");
+      setTimeout(() => {
+        window.location.href = "/";
+      }
+        , 2000);
+      return;
+    }
+
+
+    try {
+      const response = await axios.post("https://2jlple5l42kiuf4fhoup77n4om0hqesm.lambda-url.ap-southeast-1.on.aws/", {
+        action: "upload",
+        mobile,
+        files,
+      });
+      if (response.status === 200) {
+        console.log("Submitting images:", images.map(img => img.name));
+        setImages([])
+        setQuota(response.data.remainingQuota);
+      } else {
+        alert("Failed to upload images. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("An error occurred while uploading images.");
+    }
     setShowModal(true);
   };
 
@@ -87,13 +168,21 @@ const Landing = () => {
           {images.length > 0 && (
             <div className="grid grid-cols-2 gap-4 mt-4">
               {images.map((image, index) => (
-                <div key={index} className="border rounded overflow-hidden">
+                <div key={index} className="border rounded overflow-hidden relative">
                   <img
                     src={URL.createObjectURL(image)}
                     alt={`Preview ${index}`}
                     className="w-full h-32 object-cover"
                   />
                   <p className="text-sm text-center truncate p-1">{image.name}</p>
+                  <button
+                    onClick={() => {
+                      setImages(prev => prev.filter((_, i) => i !== index));
+                    }}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
                 </div>
               ))}
             </div>
