@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import logo from "../image/logo192.png"
 
 const Home = () => {
   const [name, setName] = useState("");
@@ -50,14 +51,21 @@ const Home = () => {
         onSubmit={handleSubmit}
         className="bg-white m-4 p-8 rounded-2xl shadow-lg space-y-6 w-full max-w-md"
       >
-        <h1 className="text-2xl font-bold text-center text-indigo-600">Welcome</h1>
-
+        <h1 className="text-2xl font-bold text-center text-[#801f36]">District 80 AC 2025</h1>
+        <div className="flex justify-center">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-16 w-16 object-contain"
+          />
+        </div>
         <div>
           <label className="block mb-1 font-medium text-gray-700">Name</label>
           <input
             type="text"
             required
             value={name}
+            placeholder="Enter your name"
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
@@ -70,13 +78,14 @@ const Home = () => {
             required
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
+            placeholder="Without country code"
             className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-2 rounded-xl hover:bg-indigo-700 transition"
+          className="w-full bg-[#801f36] text-white py-2 rounded-xl transition"
         >
           Continue
         </button>

@@ -25,6 +25,10 @@ const Landing = () => {
     const totalFiles = images.length + selectedFiles.length;
 
     if (totalFiles > quota) {
+      if(quota === 0) {
+        alert("You have reached your quota limit.");
+        return;
+      }
       alert(`You can only upload ${quota} images total.`);
       return;
     }
@@ -129,7 +133,7 @@ const Landing = () => {
         <div className="bg-white p-4 rounded-xl shadow">
           <h2 className="text-lg font-semibold text-gray-800">
             Quota Remaining:{" "}
-            <span className="text-indigo-600">{quota - images.length}</span>
+            <span className="text-[#000]">{quota - images.length}</span>
           </h2>
         </div>
 
@@ -150,7 +154,7 @@ const Landing = () => {
                 click to browse
               </p>
               <div
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer relative z-10"
+                className="bg-[#801f36] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer relative z-10"
               >
                 Select Images
               </div>
@@ -190,7 +194,7 @@ const Landing = () => {
 
           <button
             onClick={() => handleSubmit()}
-            className="w-full bg-indigo-600 text-white py-2 rounded-xl hover:bg-indigo-700 transition"
+            className="w-full bg-[#801f36] text-white py-2 rounded-xl hover:bg-indigo-700 transition"
           >
             Submit
           </button>
@@ -204,7 +208,7 @@ const Landing = () => {
             </h2>
             <button
               onClick={() => setShowModal(false)}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              className="mt-4 px-4 py-2 bg-[#801f36] text-white rounded-lg hover:bg-indigo-700 transition"
             >
               Close
             </button>
